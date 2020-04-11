@@ -67,7 +67,7 @@ export default function AddGameModal({
               <div className="game-user__points">
                 <InputNumber
                   onChange={(e) => updateUserPoints(e, user.dataIndex)}
-                  value={userPoints[user.dataIndex]}
+                  defaultValue={userPoints[user.dataIndex]}
                   disabled={isWinner}
                 />
               </div>
