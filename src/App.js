@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Button, Table, Typography } from "antd";
+import { Button, Table, Typography, Popconfirm } from "antd";
+import dayjs from "dayjs";
 import uniqid from "uniqid";
 
 import AddUserModal from "./components/AddUserModal";
 import AddGameModal from "./components/AddGameModal";
 import { getUsers } from "./data/users";
-import { getGames } from "./data/game";
+import { getGames, removeGame } from "./data/game";
 
 import "./App.css";
 
@@ -46,24 +47,65 @@ function App() {
 
   const updateGame = () => {
     setIsAddGameVisible(false);
-    getGamesFrombackend();
+    getUsersFromBackend();
     getGamesFrombackend();
   };
 
   const closeAddGamePopup = () => {
     setIsAddGameVisible(false);
-    getGamesFrombackend();
+    getUsersFromBackend();
     getGamesFrombackend();
   };
-  const updatedGamesData = games.map((game) => {
+
+  const updatedGamesData = games.map((game, index) => {
     return {
       key: uniqid(),
+      index: index + 1,
       ...game,
     };
   });
+  
+  const updatedUsers = [{ title: "Game no.", dataIndex: "index" }]
+    .concat(
+      users.map((user) => {
+        return {
+          ...user,
+          render: (value) => {
+            if (value >= 0) {
+              return <span style={{ color: "#52c41a" }}>{value}</span>;
+            }
+            return <Text type="danger">{value}</Text>;
+          },
+        };
+      })
+    )
+    .concat([
+      {
+        title: "operation",
+        dataIndex: "operation",
+        render: (text, record) =>
+          updatedGamesData.length >= 1 ? (
+            <Popconfirm
+              title="Sure to delete?"
+              onConfirm={async () => {
+                const newGames = games.filter(game => game.id === record.key);
+                setGames(newGames);
+                await removeGame();
+              }}
+            >
+              <a>Delete</a>
+            </Popconfirm>
+          ) : null,
+      },
+    ]);
+
+  console.log(games);
 
   return (
     <div className="game-data">
+      <div className="game-data__date">
+        Date: {dayjs().format("DD/MM/YYYY")}
+      </div>
       <div className="game-data__action-button">
         <div>
           <Button type="primary" onClick={() => setIsAddUserVisible(true)}>
@@ -95,7 +137,7 @@ function App() {
         />
       )}
       <Table
-        columns={users}
+        columns={updatedUsers}
         dataSource={updatedGamesData}
         pagination={false}
         bordered
@@ -111,17 +153,22 @@ function App() {
           }
           return (
             <tr>
+              <th>Total</th>
               {totalArray.map((value) => {
                 if (value >= 0) {
                   return (
                     <td>
-                      <Text type="success">
+                      <Text>
                         <span style={{ color: "#52c41a" }}>{value}</span>
                       </Text>
                     </td>
                   );
                 }
-                return <td><Text type="danger">{value}</Text></td>;
+                return (
+                  <td>
+                    <Text type="danger">{value}</Text>
+                  </td>
+                );
               })}
             </tr>
           );

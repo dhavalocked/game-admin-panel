@@ -1,37 +1,37 @@
-// const DBgames = [{
-//   id: 'a1',
-//   name: 'Game1',
-//   users: [{
-//     id: '1a',
-//     name: 'Swaraj',
-//     points: -100
-//   }, {
-//     id: '2b',
-//     name: 'Dhaval',
-//     points: -100
-//   }, {
-//     id: '3c',
-//     name: 'Nupur',
-//     points: 200
-//   }]
-// }, {
-//   id: 'a2',
-//   name: 'Game2',
-//   users: [{
-//     id: '1a',
-//     name: 'Swaraj',
-//     points: -500
-//   }, {
-//     id: '2b',
-//     name: 'Dhaval',
-//     points: 600
-//   }, {
-//     id: '3c',
-//     name: 'Nupur',
-//     points: -100
-//   }]
-// }];
-const DBgames = [];
+const DBgames = [{
+  id: 'a1',
+  name: 'Game1',
+  users: [{
+    id: '1a',
+    name: 'Swaraj',
+    points: -100
+  }, {
+    id: '2b',
+    name: 'Dhaval',
+    points: -100
+  }, {
+    id: '3c',
+    name: 'Nupur',
+    points: 200
+  }]
+}, {
+  id: 'a2',
+  name: 'Game2',
+  users: [{
+    id: '1a',
+    name: 'Swaraj',
+    points: -500
+  }, {
+    id: '2b',
+    name: 'Dhaval',
+    points: 600
+  }, {
+    id: '3c',
+    name: 'Nupur',
+    points: -100
+  }]
+}];
+// const DBgames = [];
 
 const games = DBgames.map((game) => {
   const result = {};
