@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import uniqid from 'uniqid';
 import { Modal, Button, Input } from 'antd';
-import { EditOutlined } from '@ant-design/icons';
+import { CheckOutlined } from '@ant-design/icons';
 import UserNameField from './UserNameField';
 import { updateUser, addUser } from '../data/users';
 
@@ -39,7 +39,7 @@ export default function AddUserModal({ isAddUserVisible, updateUsers, closeAddUs
         <div className="user-wrapper">
           <div className="edit-wrapper">
             <Input value={name} onChange={onNameChange} className="input-wrapper" />
-            <Button type="primary" shape="circle" icon={<EditOutlined />} onClick={addNewUser} />
+            <Button type="primary" shape="circle" icon={<CheckOutlined />} onClick={addNewUser} />
           </div>
         </div>
       </Modal>

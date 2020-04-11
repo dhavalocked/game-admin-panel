@@ -1,12 +1,12 @@
 // const users = [{
 //   title: 'Swaraj', // userName
-//   dataIndex: '1' // userId
+//   dataIndex: '1a' // userId
 // }, {
 //   title: 'Dhaval',
-//   dataIndex: '2'
+//   dataIndex: '2b'
 // }, {
 //   title: 'Nupur',
-//   dataIndex: '3'
+//   dataIndex: '3c'
 // }];
 const users = [];
 
@@ -31,7 +31,7 @@ export const updateUser = (id, value) => new Promise((resolve) => {
   users.forEach((user) => {
     if (user.dataIndex === id) {
       user.title = value;
-      user.dataIndex = value;
+      user.dataIndex = id;
     }
   });
   resolve();

@@ -2,15 +2,15 @@
 //   id: 'a1',
 //   name: 'Game1',
 //   users: [{
-//     id: '1',
+//     id: '1a',
 //     name: 'Swaraj',
 //     points: -100
 //   }, {
-//     id: '2',
+//     id: '2b',
 //     name: 'Dhaval',
 //     points: -100
 //   }, {
-//     id: '3',
+//     id: '3c',
 //     name: 'Nupur',
 //     points: 200
 //   }]
@@ -18,15 +18,15 @@
 //   id: 'a2',
 //   name: 'Game2',
 //   users: [{
-//     id: '1',
+//     id: '1a',
 //     name: 'Swaraj',
 //     points: -500
 //   }, {
-//     id: '2',
+//     id: '2b',
 //     name: 'Dhaval',
 //     points: 600
 //   }, {
-//     id: '3',
+//     id: '3c',
 //     name: 'Nupur',
 //     points: -100
 //   }]

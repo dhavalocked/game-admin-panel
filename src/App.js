@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { Button, Table } from "antd";
-import uniqid from 'uniqid';
+import { Button, Table, Typography } from "antd";
+import uniqid from "uniqid";
 
 import AddUserModal from "./components/AddUserModal";
 import AddGameModal from "./components/AddGameModal";
-import { getUsers } from './data/users';
-import { getGames } from './data/game';
+import { getUsers } from "./data/users";
+import { getGames } from "./data/game";
 
 import "./App.css";
+
+const { Text } = Typography;
 
 function App() {
   const [isAddUserVisible, setIsAddUserVisible] = useState(false);
@@ -56,8 +58,8 @@ function App() {
   const updatedGamesData = games.map((game) => {
     return {
       key: uniqid(),
-      ...game
-    }
+      ...game,
+    };
   });
 
   return (
@@ -93,6 +95,33 @@ function App() {
         dataSource={updatedGamesData}
         pagination={false}
         bordered
+        summary={(pageData) => {
+          const totalArray = [];
+          for (let i = 0; i < users.length; i++) {
+            let userSum = 0;
+            const userId = users[i].dataIndex;
+            for (let j = 0; j < pageData.length; j++) {
+              userSum += pageData[j][userId];
+            }
+            totalArray.push(userSum);
+          }
+          return (
+            <tr>
+              {totalArray.map((value) => {
+                if (value >= 0) {
+                  return (
+                    <td>
+                      <Text type="success">
+                        <span style={{ color: "#52c41a" }}>{value}</span>
+                      </Text>
+                    </td>
+                  );
+                }
+                return <td><Text type="danger">{value}</Text></td>;
+              })}
+            </tr>
+          );
+        }}
       />
     </div>
   );
