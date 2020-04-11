@@ -1,14 +1,14 @@
-const users = [{
-  title: 'Swaraj', // userName
-  dataIndex: '1a' // userId
-}, {
-  title: 'Dhaval',
-  dataIndex: '2b'
-}, {
-  title: 'Nupur',
-  dataIndex: '3c'
-}];
-// const users = [];
+// const users = [{
+//   title: 'Swaraj', // userName
+//   dataIndex: '1a' // userId
+// }, {
+//   title: 'Dhaval',
+//   dataIndex: '2b'
+// }, {
+//   title: 'Nupur',
+//   dataIndex: '3c'
+// }];
+const users = [];
 
 export const getUsers = () => new Promise((resolve) => {
   resolve(users);
