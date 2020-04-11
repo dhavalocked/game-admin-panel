@@ -48,6 +48,7 @@ export default function AddGameModal({
       })
     };
     await addGame(game);
+    setUserPoints({});
     updateGame();
   };
 

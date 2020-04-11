@@ -76,20 +76,24 @@ function App() {
           </Button>
         </div>
       </div>
-      <AddUserModal
-        isAddUserVisible={isAddUserVisible}
-        updateUsers={updateUsers}
-        closeAddUserPopup={closeAddUserPopup}
-        games={games}
-        users={users}
-      />
-      <AddGameModal
-        isAddGameVisible={isAddGameVisible}
-        updateGame={updateGame}
-        closeAddGamePopup={closeAddGamePopup}
-        games={games}
-        users={users}
-      />
+      {isAddUserVisible && (
+        <AddUserModal
+          isAddUserVisible={isAddUserVisible}
+          updateUsers={updateUsers}
+          closeAddUserPopup={closeAddUserPopup}
+          games={games}
+          users={users}
+        />
+      )}
+      {isAddGameVisible && (
+        <AddGameModal
+          isAddGameVisible={isAddGameVisible}
+          updateGame={updateGame}
+          closeAddGamePopup={closeAddGamePopup}
+          games={games}
+          users={users}
+        />
+      )}
       <Table
         columns={users}
         dataSource={updatedGamesData}
