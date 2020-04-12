@@ -43,7 +43,7 @@ export default function AddGameModal({
         return {
           id: user.dataIndex,
           name: user.title,
-          points: userPoints[user.dataIndex]
+          points: userPoints[user.dataIndex] || 0
         }
       })
     };

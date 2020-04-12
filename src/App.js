@@ -64,6 +64,7 @@ function App() {
       ...game,
     };
   });
+  const lastGameId = updatedGamesData[games.length - 1] && updatedGamesData[games.length - 1].key;
   
   const updatedUsers = [{ title: "Game no.", dataIndex: "index" }]
     .concat(
@@ -72,9 +73,9 @@ function App() {
           ...user,
           render: (value) => {
             if (value >= 0) {
-              return <span style={{ color: "#52c41a" }}>{value}</span>;
+              return <span style={{ color: "#52c41a" }}>{value || 0}</span>;
             }
-            return <Text type="danger">{value}</Text>;
+            return <Text type="danger">{value || 0}</Text>;
           },
         };
       })
@@ -84,7 +85,7 @@ function App() {
         title: "operation",
         dataIndex: "operation",
         render: (text, record) =>
-          updatedGamesData.length >= 1 ? (
+        lastGameId === record.key ? (
             <Popconfirm
               title="Sure to delete?"
               onConfirm={async () => {
@@ -98,8 +99,6 @@ function App() {
           ) : null,
       },
     ]);
-
-  console.log(games);
 
   return (
     <div className="game-data">
@@ -147,7 +146,7 @@ function App() {
             let userSum = 0;
             const userId = users[i].dataIndex;
             for (let j = 0; j < pageData.length; j++) {
-              userSum += pageData[j][userId];
+              userSum += pageData[j][userId] || 0;
             }
             totalArray.push(userSum);
           }
