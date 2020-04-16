@@ -1,38 +1,68 @@
 import React, { useState } from 'react';
 import uniqid from 'uniqid';
+import cloneDeep from 'clone-deep';
 import { Modal, Button, Input } from 'antd';
 import { CheckOutlined } from '@ant-design/icons';
 import UserNameField from './UserNameField';
-import { updateUser, addUser } from '../data/users';
+import { setUsersInDb, updateUsers } from '../utils';
 
-export default function AddUserModal({ isAddUserVisible, updateUsers, closeAddUserPopup, users }) {
+export default function AddUserModal({ isAddUserVisible, onAddUsers, closeAddUserPopup, users, day }) {
   const [name, setName] = useState('');
+  const [userList, setUserList] = useState(users);
+
   const updateUserName = async (id, value) => {
-    await updateUser(id, value);
+    const clonedUserList = cloneDeep(userList);
+    clonedUserList.forEach((user) => {
+      if (user.dataIndex === id) {
+        user.title = value;
+      }
+    });
+    setUserList(clonedUserList);
   };
+  
   const onNameChange = (e) => {
     const name = e.target.value.trim();
     setName(name);
   };
+  
   const addNewUser = async () => {
     const id = uniqid();
-    await addUser({
+    const clonedUserList = cloneDeep(userList);
+    clonedUserList.push({
       title: name,
       dataIndex: id
-    })
+    });
+    setUserList(clonedUserList);
     setName('');
   };
+
+  const addUsersToDb = async () => {
+    const finalUsers = userList.map((user) => ({
+      id: user.dataIndex,
+      name: user.title
+    }));
+    if (day) {
+      const finalData = {
+        day,
+        user: finalUsers
+      };
+      await updateUsers(finalData);
+    } else {
+      await setUsersInDb(finalUsers);
+    }
+    onAddUsers();
+  }
 
   return (
     <div>
       <Modal
         title="Add Users"
         visible={isAddUserVisible}
-        onOk={updateUsers}
+        onOk={() => addUsersToDb()}
         onCancel={closeAddUserPopup}
       >
-        {users.map((user) => (
-          <div className="user-wrapper">
+        {userList.map((user) => (
+          <div className="user-wrapper" key={user.dataIndex}>
             <UserNameField user={user} updateUserName={updateUserName} />
           </div>
         ))}

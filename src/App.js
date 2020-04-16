@@ -1,109 +1,85 @@
 import React, { useState, useEffect } from "react";
-import { Button, Table, Typography, Popconfirm } from "antd";
-import dayjs from "dayjs";
-import uniqid from "uniqid";
+import { Button } from "antd";
+import { useDispatch, useSelector } from 'react-redux';
+import { setUsers, getUsers, setDay, getDay } from './slices/usersSlice';
+import { setGames, getGames, setIsUpdating, setUpdatingGame, getUpdatingGame } from './slices/gamesSlice';
 
 import AddUserModal from "./components/AddUserModal";
 import AddGameModal from "./components/AddGameModal";
-import { getUsers } from "./data/users";
-import { getGames, removeGame } from "./data/game";
+import GameTable from "./components/GameTable";
+import { getUsersAndGames, setGameInDb, updateGameInDb } from './utils';
+import { addGamesRow, addUsersCol } from './utils/addRowCol';
 
 import "./App.css";
 
-const { Text } = Typography;
-
 function App() {
+  const dispatch = useDispatch();
+  const users = useSelector(getUsers);
+  const games = useSelector(getGames);
+  const day = useSelector(getDay);
+  const updatingGame = useSelector(getUpdatingGame);
   const [isAddUserVisible, setIsAddUserVisible] = useState(false);
   const [isAddGameVisible, setIsAddGameVisible] = useState(false);
-  const [games, setGames] = useState([]);
-  const [users, setUsers] = useState([]);
 
-  const getGamesFrombackend = async () => {
-    const gamesResults = await getGames();
-    setGames(gamesResults);
-  };
-
-  const getUsersFromBackend = async () => {
-    const usersResults = await getUsers();
-    setUsers(usersResults);
-  };
+  const fetchUsersAndGames = async () => {
+    const result = await getUsersAndGames();
+    const { user, games } = result.data.response;
+    const formatUsers = (user[0] && user[0].user.map((user) => ({
+      title: user.name,
+      dataIndex: user.id
+    }))) || [];
+    const newDay = (user[0] && user[0].day) || '';
+    dispatch(setUsers(formatUsers));
+    dispatch(setGames(games));
+    dispatch(setDay(newDay));
+  }
 
   useEffect(() => {
-    getGamesFrombackend();
-    getUsersFromBackend();
-  });
+    fetchUsersAndGames();
+  }, []);
 
-  const updateUsers = () => {
+  const onAddUsers = async () => {
     setIsAddUserVisible(false);
-    getUsersFromBackend();
-    getGamesFrombackend();
+    await fetchUsersAndGames();
   };
 
   const closeAddUserPopup = () => {
     setIsAddUserVisible(false);
-    getUsersFromBackend();
-    getGamesFrombackend();
   };
 
-  const updateGame = () => {
+  const addGame = async (game) => {
+    await setGameInDb(game);
     setIsAddGameVisible(false);
-    getUsersFromBackend();
-    getGamesFrombackend();
+    fetchUsersAndGames();
+  };
+
+  const updatingGameInDb = async (game) => {
+    dispatch(setIsUpdating(false));
+    dispatch(setUpdatingGame({}));
+    await updateGameInDb(game);
+    dispatch(setIsUpdating(false));
   };
 
   const closeAddGamePopup = () => {
     setIsAddGameVisible(false);
-    getUsersFromBackend();
-    getGamesFrombackend();
+    dispatch(setIsUpdating(false));
   };
 
-  const updatedGamesData = games.map((game, index) => {
-    return {
-      key: uniqid(),
-      index: index + 1,
-      ...game,
-    };
-  });
-  const lastGameId = updatedGamesData[games.length - 1] && updatedGamesData[games.length - 1].key;
-  
-  const updatedUsers = [{ title: "Game no.", dataIndex: "index" }]
-    .concat(
-      users.map((user) => {
-        return {
-          ...user,
-          render: (value) => {
-            if (value >= 0) {
-              return <span style={{ color: "#52c41a" }}>{value || 0}</span>;
-            }
-            return <Text type="danger">{value || 0}</Text>;
-          },
-        };
-      })
-    )
-    .concat([
-      {
-        title: "operation",
-        dataIndex: "operation",
-        render: (text, record) =>
-        lastGameId === record.key ? (
-            <Popconfirm
-              title="Sure to delete?"
-              onConfirm={async () => {
-                const newGames = games.filter(game => game.id === record.key);
-                setGames(newGames);
-                await removeGame();
-              }}
-            >
-              <a>Delete</a>
-            </Popconfirm>
-          ) : null,
-      },
-    ]);
+  const updateGame = (id) => {
+    const updateGameData = games.filter((game) => game.id === id)[0];
+    dispatch(setIsUpdating(true));
+    dispatch(setUpdatingGame(updateGameData));
+    setIsAddGameVisible(true);
+  };
+
+  const updatedGamesData = addGamesRow(games);
+  const lastGameId = games[games.length - 1] && games[games.length - 1].id;
+  const updatedUsersData = addUsersCol(users, lastGameId, updateGame);
 
   return (
     <div className="game-data">
       <div className="game-data__date">
-        Date: {dayjs().format("DD/MM/YYYY")}
+        Date: {day}
       </div>
       <div className="game-data__action-button">
         <div>
@@ -120,59 +96,24 @@ function App() {
       {isAddUserVisible && (
         <AddUserModal
           isAddUserVisible={isAddUserVisible}
-          updateUsers={updateUsers}
+          onAddUsers={onAddUsers}
           closeAddUserPopup={closeAddUserPopup}
-          games={games}
           users={users}
+          day={day}
         />
       )}
       {isAddGameVisible && (
         <AddGameModal
           isAddGameVisible={isAddGameVisible}
-          updateGame={updateGame}
           closeAddGamePopup={closeAddGamePopup}
-          games={games}
+          addGame={addGame}
           users={users}
+          day={day}
+          updatingGame={updatingGame}
+          updatingGameInDb={updatingGameInDb}
         />
       )}
-      <Table
-        columns={updatedUsers}
-        dataSource={updatedGamesData}
-        pagination={false}
-        bordered
-        summary={(pageData) => {
-          const totalArray = [];
-          for (let i = 0; i < users.length; i++) {
-            let userSum = 0;
-            const userId = users[i].dataIndex;
-            for (let j = 0; j < pageData.length; j++) {
-              userSum += pageData[j][userId] || 0;
-            }
-            totalArray.push(userSum);
-          }
-          return (
-            <tr>
-              <th>Total</th>
-              {totalArray.map((value) => {
-                if (value >= 0) {
-                  return (
-                    <td>
-                      <Text>
-                        <span style={{ color: "#52c41a" }}>{value}</span>
-                      </Text>
-                    </td>
-                  );
-                }
-                return (
-                  <td>
-                    <Text type="danger">{value}</Text>
-                  </td>
-                );
-              })}
-            </tr>
-          );
-        }}
-      />
+      <GameTable users={updatedUsersData} games={updatedGamesData} />
     </div>
   );
 }

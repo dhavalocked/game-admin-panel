@@ -1,16 +1,38 @@
 import React, { useState, useCallback } from "react";
+import { useSelector } from 'react-redux';
 import { Modal, Radio, InputNumber } from "antd";
+import { getIsUpdating, getUpdatingGame } from '../slices/gamesSlice';
 import uniqid from 'uniqid';
-import { addGame } from "../data/game";
+import { useEffect } from "react";
 
 export default function AddGameModal({
   isAddGameVisible,
-  updateGame,
   closeAddGamePopup,
-  users
+  users,
+  addGame,
+  day,
+  updatingGameInDb
 }) {
+  const isUpdating = useSelector(getIsUpdating);
+  const updatingGame = useSelector(getUpdatingGame);
+  let updatingGamePoints = {};
+
+  useEffect(() => {
+    const updatingGamePoints = {};
+    if (isUpdating) {
+      updatingGame.users.forEach((user) => {
+        if (user.points > 0) {
+          setWinner(user.id);
+        } else {
+          updatingGamePoints[user.id] = -user.points;
+        }
+      });
+      setUserPoints(updatingGamePoints);
+    }
+  }, [isUpdating, updatingGame]);
+
   const [winner, setWinner] = useState('');
-  const [userPoints, setUserPoints] = useState({});
+  const [userPoints, setUserPoints] = useState(updatingGamePoints);
 
   const updateUserPoints = useCallback((points, userId) => {
     userPoints[userId] = points;
@@ -27,29 +49,55 @@ export default function AddGameModal({
   }, [setWinner, userPoints, setUserPoints]);
 
   const createGame = async () => {
-    const id = uniqid();
-    const totalSum = Object.values(userPoints).reduce((val, acc) => acc + val, 0);
-    const game = {
-      id,
-      name: `Game-${id}`,
-      users: users.map((user) => {
-        if (user.dataIndex === winner) {
+    if (isUpdating) {
+      const { _id, id, name, day } = updatingGame;
+      const totalSum = Object.values(userPoints).reduce((val, acc) => acc + val, 0);
+      const finalData = {
+        _id,
+        id,
+        name,
+        day,
+        users: users.map((user) => {
+          if (user.dataIndex === winner) {
+            return {
+              id: user.dataIndex,
+              name: user.title,
+              points: Math.abs(totalSum)
+            };
+          }
           return {
             id: user.dataIndex,
             name: user.title,
-            points: Math.abs(totalSum)
-          };
-        }
-        return {
-          id: user.dataIndex,
-          name: user.title,
-          points: userPoints[user.dataIndex] || 0
-        }
-      })
-    };
-    await addGame(game);
+            points: -userPoints[user.dataIndex] || 0
+          }
+        })
+      }
+      await updatingGameInDb(finalData);
+    } else {
+      const id = uniqid();
+      const totalSum = Object.values(userPoints).reduce((val, acc) => acc + val, 0);
+      const game = {
+        id,
+        name: `Game-${id}`,
+        day,
+        users: users.map((user) => {
+          if (user.dataIndex === winner) {
+            return {
+              id: user.dataIndex,
+              name: user.title,
+              points: Math.abs(totalSum)
+            };
+          }
+          return {
+            id: user.dataIndex,
+            name: user.title,
+            points: -userPoints[user.dataIndex] || 0
+          }
+        })
+      };
+      await addGame(game);
+    }
     setUserPoints({});
-    updateGame();
   };
 
   return (
